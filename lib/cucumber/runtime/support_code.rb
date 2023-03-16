@@ -73,7 +73,28 @@ module Cucumber
         matches = step_matches(step_name)
         raise UndefinedDynamicStep, step_name if matches.empty?
 
+$nested_steps_measurements |= []
+before = Cucumber::Core::Test::Timer::MonotonicTime.time_in_nanoseconds
         matches.first.invoke(multiline_argument)
+after = Cucumber::Core::Test::Timer::MonotonicTime.time_in_nanoseconds
+
+binding.pry
+invoked_from = begin
+                 stacktrace = Thread.current.backtrace
+                 stacktrace.
+               rescue StandardError => _e
+                 nil
+               end
+
+# replace with target branch
+$nested_steps_measurements << {
+  step_name:,
+  location: invoked_from,
+  duration: after - before
+}
+
+binding.pry
+puts "asd"
       end
 
       def load_files!(files)
